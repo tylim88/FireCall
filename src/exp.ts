@@ -7,31 +7,51 @@ export type Schema = {
 	name: z.ZodLiteral<string>
 }
 
-export const onCallObjArr: {
+export type onCallObj = {
 	onCall: functions.HttpsFunction & functions.Runnable<unknown>
 	schema: Schema
 	doNotExport?: boolean
-}[] = []
+}
 
 /**
  * dynamically exports function
  */
-export const exp = () => {
-	const nameLookup: Record<string, boolean> = {}
-	return onCallObjArr.map(item => {
-		const {
-			schema: {
-				name: { value },
-			},
-			doNotExport,
-			onCall,
-		} = item
-		if (doNotExport) return
-		if (nameLookup[value]) {
-			throw Error(`Duplicated Function Name ${value}`)
-		} else {
-			nameLookup[value] = true
+export const exp = (
+	obj: Record<
+		string,
+		{
+			onCall: functions.HttpsFunction & functions.Runnable<unknown>
+			schema: Schema
+			doNotExport?: boolean
 		}
-		return { name: value, onCall }
-	})
+	>
+) => {
+	const nameLookup: Record<string, boolean> = {}
+	const arr: onCallObj[] = []
+	for (const prop in obj) {
+		arr.push(obj[prop] as onCallObj)
+	}
+
+	const newArr = arr
+		.map(item => {
+			const {
+				schema: {
+					name: { value },
+				},
+				doNotExport,
+				onCall,
+			} = item
+			if (doNotExport) return
+			if (nameLookup[value]) {
+				throw Error(`Duplicated Function Name ${value}`)
+			} else {
+				nameLookup[value] = true
+			}
+			return { name: value, onCall }
+		})
+		.filter(item => !!item)
+
+	type Arr = (typeof newArr extends (infer A)[] ? NonNullable<A> : never)[]
+
+	return newArr as Arr
 }

@@ -2,7 +2,7 @@ import * as functions from 'firebase-functions'
 import { z } from 'zod'
 import { throwAndLogHttpsError } from './throwAndLogHttpsError'
 import { NonNullableKey, OmitKeys } from './types'
-import { onCallObjArr, Schema } from './exp'
+import { Schema } from './exp'
 
 // standardize the way of data validation, auth checking and error handling
 export const onCall = <
@@ -104,5 +104,5 @@ export const onCall = <
 		}
 	)
 
-	onCallObjArr.push({ onCall, schema, doNotExport })
+	return { onCall, schema, doNotExport }
 }
