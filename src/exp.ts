@@ -18,7 +18,7 @@ export const onCallObjArr: {
  */
 export const exp = () => {
 	const nameLookup: Record<string, boolean> = {}
-	onCallObjArr.forEach(item => {
+	return onCallObjArr.map(item => {
 		const {
 			schema: {
 				name: { value },
@@ -32,6 +32,6 @@ export const exp = () => {
 		} else {
 			nameLookup[value] = true
 		}
-		exports[value] = onCall
+		return { name: value, onCall }
 	})
 }
