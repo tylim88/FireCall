@@ -5,7 +5,7 @@ import { NonNullableKey, OmitKeys } from './types'
 import { onCallObjArr, Schema } from './exp'
 
 // standardize the way of data validation, auth checking and error handling
-export const onCallCreator = <
+export const onCall = <
 	T extends Schema,
 	Q extends z.infer<T['res']>,
 	R extends { ok: functions.https.FunctionsErrorCode },
@@ -29,7 +29,10 @@ export const onCallCreator = <
 		R extends never
 			? R
 			:
-					| OmitKeys<Parameters<typeof throwAndLogHttpsError>[0], 'onLogging'>
+					| (OmitKeys<
+							Parameters<typeof throwAndLogHttpsError>[0],
+							'onLogging' | 'details'
+					  > & { err?: Record<string, unknown> })
 					| {
 							code: 'ok'
 							data: keyof Q extends keyof z.infer<T['res']> ? Q : never // ensure exact object shape
@@ -71,7 +74,7 @@ export const onCallCreator = <
 				return throwAndLogHttpsError({
 					code: 'unknown',
 					message: 'unknown error',
-					details: err,
+					details: { requestData, context, err },
 					onLogging,
 				})
 			})
@@ -92,7 +95,7 @@ export const onCallCreator = <
 				// thrown known error
 				throwAndLogHttpsError({
 					code: res.code,
-					details: res.details,
+					details: { requestData, context, err: res.err },
 					message: res.message,
 					logType: res.logType,
 					onLogging,

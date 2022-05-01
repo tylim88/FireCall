@@ -1,10 +1,10 @@
 {
 	"name": "firecall",
-	"version": "0.0.0",
+	"version": "0.0.1",
 	"description": "🔥 Write Firebase on call function code in a scalable way. Standardize validation and error logging. Enforce type safety of function naming and data on compile time and runtime.",
 	"source": "src/index.ts",
-	"main": "dist/src/index.js",
-	"types": "dist/src/index.d.ts",
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
 	"targets": {
 		"types": false,
 		"main": {
