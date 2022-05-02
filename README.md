@@ -53,9 +53,9 @@ FireCall standardizes how functions should handle:
 - Validate Response Data With Zod
 - error onErrorLogging (only log the error, does not save the error into a file)
 
-With FireCall and FireCaller, we can ensure:
+Ensuring:
 
-- standard HTTPS Error
+- always use standard HTTPS Error
 - end point data type safety
 
 ## Installation
