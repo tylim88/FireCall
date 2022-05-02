@@ -105,7 +105,7 @@ export const getUserSchema = {
 ## Create the onCall Functions
 
 ```ts
-import { updateUserSchema } from './someFiles'
+import { updateUserSchema, getUserSchema } from './someFiles'
 import { onCall } from 'firecall'
 
 // use any variable name you want
@@ -134,7 +134,7 @@ const updateUser = onCall(
 )
 
 const getUser = onCall(
-	updateUserSchema,
+	getUserSchema,
 	{ route: 'public' }, // 'public' for unprotected route
 	// handler
 	async data => {
