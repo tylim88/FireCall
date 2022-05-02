@@ -86,6 +86,154 @@
 			</a>
 </div>
 
-Write Firebase callable function code in a scalable way. Standardize validation and error logging. Enforce type safety of function naming and data on compile time and runtime.
+🔥 Helper Function to write easier and safer Firebase onCall function
 
-_in development_
+FireCall standardizes how functions should handle:
+
+- Unauthorized Authentication Error
+- Unknown Error
+- Invalid Request Data Error
+- Invalid Response Data Error\*
+- Validate Request Data With Zod
+- Validate Response Data With Zod\*
+
+With FireCall and FireCaller, we can ensure:
+
+- standard HTTPS Error
+- end point data type safety
+
+It may seem bizarre why we need to validate response data, but it is not wrong to make sure the data shape is correct in run time.
+
+## Installation
+
+```bash
+npm install firecall zod firebase-functions
+```
+
+and of course you need `Typescript`.
+
+## Usage
+
+First, you need to create schema with `zod`, you can share this file to front end.
+
+Note: You should use [FireCaller](https://github.com/tylim88/FireCaller) in front end.
+
+### Create Schema With Zod
+
+```ts
+import { z } from 'zod'
+
+export const updateUserSchema = {
+	//request data schema
+	req: z.object({
+		name: z.string(),
+		age: z.number(),
+		address: z.string(),
+	}),
+	// response data schema
+	res: z.undefined(),
+	// function name
+	name: 'updateUser',
+}
+
+export const getUserSchema = {
+	res: z.string(), // userId
+	res: z.object({
+		name: z.string(),
+		age: z.number(),
+	}),
+	name: 'getUser',
+}
+```
+
+`req`: request data schema  
+`res`: response data schema  
+`name`: onCall function name
+
+### Create the onCall Functions
+
+```ts
+import { updateUserSchema } from './someFiles'
+import { onCall } from 'firecall'
+
+// use any variable name you want
+const updateUser = onCall(
+	updateUserSchema,
+	{ route: 'private' }, // 'private' for protected route
+	// handler
+	async (data, context) => {
+		const { name, age, address } = data // request data is what you define in schema.req
+		const {
+			auth: { uid }, // if route is protected, auth object is not undefined
+		} = context
+
+		try {
+			await updateWithSomeDatabase({ uid, name, age, address })
+			return { code: 'ok', data: undefined } // response data is what you define in schema.res
+		} catch (e) {
+			// in case you are not catching any error, FireCall will also throw unknown error
+			return {
+				code: 'unknown',
+				message: 'update user failed',
+				err,
+			}
+		}
+	}
+)
+
+const getUser = onCall(
+	updateUserSchema,
+	{ route: 'public' }, // 'public' for unprotected route
+	// handler
+	async data => {
+		const uid = data // request data is what you define in schema.req
+
+		try {
+			const { name, age, secret } = await getUserFromDatabase({
+				uid,
+			})
+			return { code: 'ok', data: { name, age } } // response data is what you define in schema.res
+		} catch (e) {
+			// in case you are not catching any error, FireCall will also throw unknown error
+			return {
+				code: 'unknown',
+				message: 'get user failed',
+				err,
+			}
+		}
+	}
+)
+```
+
+If the response is ok, handler must return object with `code` and `data` property, where  
+`code`: 'ok'  
+`data`: value that has same type as type you define in schema.res
+
+if the response is not ok, handler must return object with `code`, `message` and `err` property, where  
+`code`: [Firebase Functions Error Code](https://firebase.google.com/docs/reference/node/firebase.functions#functionserrorcode) except 'ok'  
+`message`: string  
+`err`: optional, put anything you want here, normally the error object or just skip it
+
+### Export Functions
+
+```ts
+import { updateUser, getUser } from './someOtherFile'
+import { exp } from 'firecall'
+
+exp({ updateUser, getUser }).forEach(func => {
+	const { name, onCall } = func
+	exports[name] = onCall
+})
+```
+
+if everything in `someOtherFile` is FireCall function, you can write something like this
+
+```ts
+import * as allFunc from './someOtherFile'
+import { exp } from 'firecall'
+
+exp(allFunc).forEach(func => {
+	const { name, onCall } = func
+	exports[name] = onCall
+})
+```

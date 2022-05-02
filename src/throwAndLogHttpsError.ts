@@ -20,7 +20,7 @@ export type Details<RequestData, Err, ZodError> = {
  * @param settings.details.zodError optional, zod validation error
  * @param settings.details.err optional error object
  * @param settings.logType optional, 'log' | 'info' | 'warn' | 'error', default is 'error'
- * @param settings.onLogging optional, leave it empty or set as undefined or set as true to automatically log {@link settings.details.requestData}, {@link settings.details.context} and {@link settings.details.zodError}(if available). Assign false to not log any of it. You can pass a function that receive {@link settings.details.requestData}, {@link settings.details.context} and {@link settings.details.zodError} as argument, and process your error there eg saving log file), the return of the function be logged.
+ * @param settings.onLogging optional, leave it empty(undefined) or set as true to automatically log {@link settings.details.requestData}, {@link settings.details.context} and {@link settings.details.zodError}(if available). Assign false to not log any of it. You can pass a function that receive {@link settings.details.requestData}, {@link settings.details.context} and {@link settings.details.zodError} as argument, and process your error there eg saving log file), the return of the function be logged.
  * @return never, error thrown with what define in {@link settings.code} adn {@link settings.message}
  */
 export const throwAndLogHttpsError = async <

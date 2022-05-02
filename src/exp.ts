@@ -1,31 +1,22 @@
 import * as functions from 'firebase-functions'
-import { z, ZodType, ZodTypeDef } from 'zod'
+import { ZodType, ZodTypeDef } from 'zod'
 
 export type Schema = {
 	req: ZodType<unknown, ZodTypeDef, unknown>
 	res: ZodType<unknown, ZodTypeDef, unknown>
-	name: z.ZodLiteral<string>
+	name: string
 }
 
 export type onCallObj = {
 	onCall: functions.HttpsFunction & functions.Runnable<unknown>
 	schema: Schema
-	doNotExport?: boolean
+	config: { doNotExport?: boolean }
 }
 
 /**
  * dynamically exports function
  */
-export const exp = (
-	obj: Record<
-		string,
-		{
-			onCall: functions.HttpsFunction & functions.Runnable<unknown>
-			schema: Schema
-			doNotExport?: boolean
-		}
-	>
-) => {
+export const exp = (obj: Record<string, onCallObj>) => {
 	const nameLookup: Record<string, boolean> = {}
 	const arr: onCallObj[] = []
 	for (const prop in obj) {
@@ -35,19 +26,17 @@ export const exp = (
 	const newArr = arr
 		.map(item => {
 			const {
-				schema: {
-					name: { value },
-				},
-				doNotExport,
+				schema: { name },
+				config: { doNotExport },
 				onCall,
 			} = item
 			if (doNotExport) return
-			if (nameLookup[value]) {
-				throw Error(`Duplicated Function Name ${value}`)
+			if (nameLookup[name]) {
+				throw Error(`Duplicated Function Name ${name}`)
 			} else {
-				nameLookup[value] = true
+				nameLookup[name] = true
 			}
-			return { name: value, onCall }
+			return { name, onCall }
 		})
 		.filter(item => !!item)
 
