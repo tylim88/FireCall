@@ -1,18 +1,29 @@
 import * as functions from 'firebase-functions'
 import { z } from 'zod'
-import { throwAndLogHttpsError } from './throwAndLogHttpsError'
-import { NonNullableKey, OmitKeys } from './types'
+import {
+	throwAndLogHttpsError,
+	Details,
+	BadCode,
+	LogType,
+} from './throwAndLogHttpsError'
+import { NonNullableKey } from './types'
 import { Schema, onCallObj } from './exp'
 
+type BadRes = {
+	code: BadCode
+	message: string
+	logType?: LogType
+	err?: unknown
+}
+
+type GoodReq<S extends Schema, ResData extends z.infer<S['res']>> = {
+	code: 'ok'
+	data: keyof ResData extends keyof z.infer<S['res']> ? ResData : never // ensure exact object shape
+}
+
 type Ret<S extends Schema, ResData extends z.infer<S['res']>> =
-	| (OmitKeys<
-			Parameters<typeof throwAndLogHttpsError>[0],
-			'onLogging' | 'details'
-	  > & { err?: Record<string, unknown> })
-	| {
-			code: 'ok'
-			data: keyof ResData extends keyof z.infer<S['res']> ? ResData : never // ensure exact object shape
-	  }
+	| BadRes
+	| GoodReq<S, ResData>
 
 type Rot<Route extends 'private' | 'public'> = Route extends 'private'
 	? NonNullableKey<functions.https.CallableContext, 'auth'>
@@ -28,7 +39,7 @@ type Rot<Route extends 'private' | 'public'> = Route extends 'private'
  * @param schema.name name of the function
  * @param config functions setting
  * @param config.route private route or public route, private = need authentication, public = not need authentication.
- * @param config.onLogging optional, leave it empty(undefined) or set as true to automatically log {@link settings.details.requestData}, {@link settings.details.context} and {@link settings.details.zodError}(if available). Assign false to not log any of it. You can pass a function that receive {@link settings.details.requestData}, {@link settings.details.context} and {@link settings.details.zodError} as argument, and process your error there eg saving log file), the return of the function be logged.
+ * @param config.onErrorLogging optional, leave it empty(undefined) or set as true to automatically log {@link settings.details.reqData}, {@link settings.details.context} and {@link settings.details.zodError}(if available). Assign false to not log any of it. You can pass a function that receive {@link settings.details.reqData}, {@link settings.details.context} and {@link settings.details.zodError} as argument, and process your error there eg saving log file), the return of the function be logged.
  * @param config.doNotExport optional, if this is true, then `exp` will not export the function.
  * @param config.functions optional, insert firebase function builder here.
  * @param handler onCall handler, receive request data and callable context as argument
@@ -37,57 +48,77 @@ type Rot<Route extends 'private' | 'public'> = Route extends 'private'
 export const onCall = <
 	S extends Schema,
 	ResData extends z.infer<S['res']>,
-	Return extends { ok: functions.https.FunctionsErrorCode },
+	Handler extends (
+		reqData: z.infer<S['req']>,
+		context: Rot<Route>
+	) => Promise<Ret<S, ResData>> | Ret<S, ResData>,
 	Route extends 'private' | 'public'
 >(
 	schema: S,
 	config: {
 		route: Route
-		onLogging?: Parameters<typeof throwAndLogHttpsError>[0]['onLogging']
+		onErrorLogging?:
+			| boolean
+			| ((
+					details: Details<
+						z.infer<S['req']>,
+						z.ZodError<z.infer<S['req']>>,
+						z.ZodError<z.infer<S['res']>>,
+						ReturnType<Handler> extends Ret<S, ResData>
+							? ReturnType<Handler> extends BadRes
+								? ReturnType<Handler>['err']
+								: never
+							: ReturnType<Handler> extends Promise<infer P>
+							? P extends Ret<S, ResData>
+								? P extends BadRes
+									? P['err']
+									: never
+								: never
+							: never
+					>
+			  ) => unknown)
 		doNotExport?: boolean
 		func?: functions.FunctionBuilder | typeof functions
 	},
-	handler: (
-		reqData: z.infer<S['req']>,
-		context: Rot<Route>
-	) => Return extends never
-		? Return
-		: Promise<Ret<S, ResData>> | Ret<S, ResData>
+	handler: Handler
 ): onCallObj => {
-	const { route, onLogging, func } = config
+	const { route, onErrorLogging, func } = config
 	const onCall = (func || functions).https.onCall(async (data, context) => {
-		const requestData = data as z.infer<S['req']>
+		const reqData = data as z.infer<S['req']>
 		// auth validation
 		if (!context.auth && route === 'private') {
 			throwAndLogHttpsError({
 				code: 'unauthenticated',
 				message: 'Please Login First',
-				details: { requestData, context },
-				onLogging,
+				details: { reqData, context },
+				onErrorLogging,
 			})
 		}
 
-		// data validation
 		try {
-			schema.req.parse(requestData)
+			schema.req.parse(reqData)
 		} catch (zodError) {
 			throwAndLogHttpsError({
 				code: 'invalid-argument',
 				message: 'invalid-argument',
-				details: { requestData, context, zodError: zodError as z.ZodError },
-				onLogging,
+				details: {
+					reqData,
+					context,
+					reqZodError: zodError as z.ZodError<z.infer<S['req']>>,
+				},
+				onErrorLogging,
 			})
 		}
 
 		const res = await Promise.resolve(
-			handler(requestData, context as Rot<Route>)
+			handler(reqData, context as Rot<Route>)
 		).catch(err => {
 			// throw unknown error
 			return throwAndLogHttpsError({
 				code: 'unknown',
 				message: 'unknown error',
-				details: { requestData, context, err },
-				onLogging,
+				details: { reqData, context, err },
+				onErrorLogging,
 			})
 		})
 		if (res.code === 'ok') {
@@ -98,8 +129,12 @@ export const onCall = <
 				throwAndLogHttpsError({
 					code: 'internal',
 					message: 'output data malformed',
-					details: { requestData, context, zodError: zodError as z.ZodError },
-					onLogging,
+					details: {
+						reqData,
+						context,
+						resZodError: zodError as z.ZodError<z.infer<S['res']>>,
+					},
+					onErrorLogging,
 				})
 			}
 			return res.data
@@ -107,10 +142,10 @@ export const onCall = <
 			// thrown known error
 			throwAndLogHttpsError({
 				code: res.code,
-				details: { requestData, context, err: res.err },
+				details: { reqData, context, err: res.err as never },
 				message: res.message,
 				logType: res.logType,
-				onLogging,
+				onErrorLogging,
 			})
 		}
 	})

@@ -39,51 +39,6 @@
 				src="https://img.shields.io/badge/gzipped-2KB-brightgreen"
 				alt="package size"
 			/>
-			&nbsp;
-			<a href="https://github.com/tylim88/firecall/actions" target="_blank">
-				<img
-					src="https://github.com/tylim88/firecall/workflows/Main/badge.svg"
-					alt="github action"
-				/>
-			</a>
-			&nbsp;
-			<a href="https://codecov.io/gh/tylim88/firecall" target="_blank">
-				<img
-					src="https://codecov.io/gh/tylim88/firecall/branch/main/graph/badge.svg"
-					alt="code coverage"
-				/>
-			</a>
-			&nbsp;
-			<a href="https://github.com/tylim88/firecall/issues" target="_blank">
-				<img
-					alt="GitHub issues"
-					src="https://img.shields.io/github/issues-raw/tylim88/firecall"
-				></img>
-			</a>
-			&nbsp;
-			<a href="https://snyk.io/test/github/tylim88/firecall" target="_blank">
-				<img
-					src="https://snyk.io/test/github/tylim88/firecall/badge.svg"
-					alt="code coverage"
-				/>
-			</a>
-			&nbsp;
-			<a
-				href="https://lgtm.com/projects/g/tylim88/FireCall/alerts/"
-				target="_blank"
-			>
-				<img
-					alt="Total alerts"
-					src="https://img.shields.io/lgtm/alerts/g/tylim88/FireCall.svg?logo=lgtm&logoWidth=18"
-				/>
-			</a>
-			&nbsp;
-			<a href="https://lgtm.com/projects/g/tylim88/FireCall/context:javascript">
-				<img
-					target="_blank"
-					alt="Language grade: JavaScript" 
-					src="https://img.shields.io/lgtm/grade/javascript/g/tylim88/FireCall.svg?logo=lgtm&logoWidth=18"/>
-			</a>
 </div>
 
 🔥 Helper Function to write easier and safer Firebase onCall function
@@ -93,16 +48,15 @@ FireCall standardizes how functions should handle:
 - Unauthorized Authentication Error
 - Unknown Error
 - Invalid Request Data Error
-- Invalid Response Data Error\*
+- Invalid Response Data Error
 - Validate Request Data With Zod
-- Validate Response Data With Zod\*
+- Validate Response Data With Zod
+- error onErrorLogging (only log the error, does not save the error into a file)
 
 With FireCall and FireCaller, we can ensure:
 
 - standard HTTPS Error
 - end point data type safety
-
-It may seem bizarre why we need to validate response data, but it is not wrong to make sure the data shape is correct in run time.
 
 ## Installation
 
@@ -114,9 +68,9 @@ and of course you need `Typescript`.
 
 ## Create Schema With Zod
 
-First, you need to create schema with `zod`, you can share this file to front end.
+First, you need to create schema with `zod`, you can share this file to front end and use [FireCaller](https://github.com/tylim88/FireCaller) with it.
 
-Note: You should use [FireCaller](https://github.com/tylim88/FireCaller) in front end.
+FireCall can works without FireCaller on front end but it is recommended to use FireCaller with it or else there is no point sharing schema to front end.
 
 ```ts
 import { z } from 'zod'
@@ -168,7 +122,7 @@ const updateUser = onCall(
 		try {
 			await updateWithSomeDatabase({ uid, name, age, address })
 			return { code: 'ok', data: undefined } // response data is what you define in schema.res
-		} catch (e) {
+		} catch (err) {
 			// in case you are not catching any error, FireCall will also throw unknown error
 			return {
 				code: 'unknown',
@@ -191,7 +145,7 @@ const getUser = onCall(
 				uid,
 			})
 			return { code: 'ok', data: { name, age } } // response data is what you define in schema.res
-		} catch (e) {
+		} catch (err) {
 			// in case you are not catching any error, FireCall will also throw unknown error
 			return {
 				code: 'unknown',
@@ -210,9 +164,11 @@ If the response is ok, handler must return object with `code` and `data` propert
 if the response is not ok, handler must return object with `code`, `message` and `err` property, where  
 `code`: [Firebase Functions Error Code](https://firebase.google.com/docs/reference/node/firebase.functions#functionserrorcode) except 'ok'  
 `message`: string  
-`err`: optional, put anything you want here, normally the error object or just skip it
+`err`: optional, **user defined error**, put anything you want here, normally the error object or just skip it
 
 ## Export Functions
+
+This is helper function to export functions. Since function name is now an object property, we need a runtime check(deploy phase runtime) to make sure each function name is unique and throw error if duplicate found.
 
 ```ts
 import { updateUser, getUser } from './someOtherFile'
@@ -247,7 +203,7 @@ import { onCall } from 'firecall'
 const someFunc = onCall(
 	someSchema,
 	{
-		route: 'public',
+		route: 'public', // route is not optional, you can use either 'public' or 'private' value
 		func: functions
 			.runWith({
 				timeoutSeconds: 300,
@@ -260,3 +216,79 @@ const someFunc = onCall(
 ```
 
 `func` accept `functions` or `functions.FunctionBuilder`
+
+## Logging Options
+
+```ts
+import { onCall } from 'firecall'
+
+
+
+// normal form
+const someFunc = onCall(
+	someSchema,
+	{
+		route: 'public', // route is not optional, you can use either 'public' or 'private' value
+		config: {
+			onErrorLogging: false, // will not log anything when error occurs
+			onErrorLogging: true, // will log everything when error occurs
+			onErrorLogging: undefined, // will log anything when error occurs
+		},
+	},
+	handler
+)
+
+`onErrorLogging`: optional, `boolean | undefined`
+
+Control how you log your error, `false` will not log anything, `true` or `undefined` will log everything.
+
+// Function form
+const someFunc = onCall(
+	someSchema,
+	{
+		route: 'public', // route is not optional, you can use either 'public' or 'private' value
+		config: {
+			onErrorLogging: ({ context, reqData, reqZodError, resZodError, err }) => {
+
+				// do something here, eg save to file
+
+				return X // whatever X is, it will get log on console
+			},
+		},
+	},
+	handler
+)
+```
+
+`onErrorLogging`: optional, `({ reqData, context, reqZodError?, resZodError?, err? })=>any`
+
+If you need a finer control, pass a function to it, the function receive an object as arguments, the props is
+
+`reqData`: the request data
+`context`: Firebase function context callable
+`reqZodError`: may exist, the error that occurs when you try to parse the request data
+`resZodError`: may exist, the error that occurs when you try to parse the response data
+`err`: may exist, it is **user defined error** that you return in handler, the type is unknown until there is user defined error in the handler, you don't need to type cast, all types will be inferred.
+
+Whatever the function return, it will get log on console.
+
+Logging doesn't include saving it to a file or somewhere, it only logs it to the Firebase functions console. If you want to save the errors, then this is a good place to do it.
+
+## Const Assertion
+
+You can use const assertion if the handler is returning response from another callback, example from the transaction.
+
+```ts
+import { onCall } from 'firecall'
+
+export const updateMasterPassword = onCall(
+	someSchema,
+	{ route: 'private' },
+	async () => {
+		// return the transaction
+		return await db.runTransaction(async transaction => {
+			return { code: 'ok', data: null } as const // do const assertion here
+		})
+	}
+)
+```
