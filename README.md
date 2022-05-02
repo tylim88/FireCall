@@ -112,13 +112,11 @@ npm install firecall zod firebase-functions
 
 and of course you need `Typescript`.
 
-## Usage
+## Create Schema With Zod
 
 First, you need to create schema with `zod`, you can share this file to front end.
 
 Note: You should use [FireCaller](https://github.com/tylim88/FireCaller) in front end.
-
-### Create Schema With Zod
 
 ```ts
 import { z } from 'zod'
@@ -150,7 +148,7 @@ export const getUserSchema = {
 `res`: response data schema  
 `name`: onCall function name
 
-### Create the onCall Functions
+## Create the onCall Functions
 
 ```ts
 import { updateUserSchema } from './someFiles'
@@ -214,7 +212,7 @@ if the response is not ok, handler must return object with `code`, `message` and
 `message`: string  
 `err`: optional, put anything you want here, normally the error object or just skip it
 
-### Export Functions
+## Export Functions
 
 ```ts
 import { updateUser, getUser } from './someOtherFile'
@@ -237,3 +235,28 @@ exp(allFunc).forEach(func => {
 	exports[name] = onCall
 })
 ```
+
+## Function Builder
+
+If you need custom setting for you function like changing ram or region, you can pass function builder to `onCall` config.
+
+```ts
+import * as functions from 'firebase-functions'
+import { onCall } from 'firecall'
+
+const someFunc = onCall(
+	someSchema,
+	{
+		route: 'public',
+		func: functions
+			.runWith({
+				timeoutSeconds: 300,
+				memory: '1GB',
+			})
+			.region('europe-west1'),
+	},
+	handler
+)
+```
+
+`func` accept `functions` or `functions.FunctionBuilder`

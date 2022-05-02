@@ -45,7 +45,7 @@ export const onCall = <
 		route: Route
 		onLogging?: Parameters<typeof throwAndLogHttpsError>[0]['onLogging']
 		doNotExport?: boolean
-		functions?: functions.FunctionBuilder | typeof functions
+		func?: functions.FunctionBuilder | typeof functions
 	},
 	handler: (
 		reqData: z.infer<S['req']>,
@@ -54,68 +54,66 @@ export const onCall = <
 		? Return
 		: Promise<Ret<S, ResData>> | Ret<S, ResData>
 ): onCallObj => {
-	const { route, onLogging, functions: functionBuilder } = config
-	const onCall = (functionBuilder || functions).https.onCall(
-		async (data, context) => {
-			const requestData = data as z.infer<S['req']>
-			// auth validation
-			if (!context.auth && route === 'private') {
-				throwAndLogHttpsError({
-					code: 'unauthenticated',
-					message: 'Please Login First',
-					details: { requestData, context },
-					onLogging,
-				})
-			}
+	const { route, onLogging, func } = config
+	const onCall = (func || functions).https.onCall(async (data, context) => {
+		const requestData = data as z.infer<S['req']>
+		// auth validation
+		if (!context.auth && route === 'private') {
+			throwAndLogHttpsError({
+				code: 'unauthenticated',
+				message: 'Please Login First',
+				details: { requestData, context },
+				onLogging,
+			})
+		}
 
-			// data validation
+		// data validation
+		try {
+			schema.req.parse(requestData)
+		} catch (zodError) {
+			throwAndLogHttpsError({
+				code: 'invalid-argument',
+				message: 'invalid-argument',
+				details: { requestData, context, zodError: zodError as z.ZodError },
+				onLogging,
+			})
+		}
+
+		const res = await Promise.resolve(
+			handler(requestData, context as Rot<Route>)
+		).catch(err => {
+			// throw unknown error
+			return throwAndLogHttpsError({
+				code: 'unknown',
+				message: 'unknown error',
+				details: { requestData, context, err },
+				onLogging,
+			})
+		})
+		if (res.code === 'ok') {
+			// validate output, rare error
 			try {
-				schema.req.parse(requestData)
+				schema.res.parse(res.data)
 			} catch (zodError) {
 				throwAndLogHttpsError({
-					code: 'invalid-argument',
-					message: 'invalid-argument',
+					code: 'internal',
+					message: 'output data malformed',
 					details: { requestData, context, zodError: zodError as z.ZodError },
 					onLogging,
 				})
 			}
-
-			const res = await Promise.resolve(
-				handler(requestData, context as Rot<Route>)
-			).catch(err => {
-				// throw unknown error
-				return throwAndLogHttpsError({
-					code: 'unknown',
-					message: 'unknown error',
-					details: { requestData, context, err },
-					onLogging,
-				})
+			return res.data
+		} else {
+			// thrown known error
+			throwAndLogHttpsError({
+				code: res.code,
+				details: { requestData, context, err: res.err },
+				message: res.message,
+				logType: res.logType,
+				onLogging,
 			})
-			if (res.code === 'ok') {
-				// validate output, rare error
-				try {
-					schema.res.parse(res.data)
-				} catch (zodError) {
-					throwAndLogHttpsError({
-						code: 'internal',
-						message: 'output data malformed',
-						details: { requestData, context, zodError: zodError as z.ZodError },
-						onLogging,
-					})
-				}
-				return res.data
-			} else {
-				// thrown known error
-				throwAndLogHttpsError({
-					code: res.code,
-					details: { requestData, context, err: res.err },
-					message: res.message,
-					logType: res.logType,
-					onLogging,
-				})
-			}
 		}
-	)
+	})
 
 	return { onCall, schema, config }
 }

@@ -1,6 +1,6 @@
 {
 	"name": "firecall",
-	"version": "0.0.10",
+	"version": "0.0.11",
 	"description": "🔥 Write Firebase on call function code in a scalable way. Standardize validation and error logging. Enforce type safety of function naming and data on compile time and runtime.",
 	"source": "src/index.ts",
 	"main": "dist/index.js",
@@ -30,10 +30,10 @@
 		"built": "-------------test built file-----------------------",
 		"b-tsc": "tsc -p tsconfig.doc.json",
 		"b-test": "firebase emulators:exec --only firestore \"jest --forceExit -c=jest.config.doc.js\"",
-		"b-uninstall": "npm --prefix codeForDoc run uninstall",
+		"b-uninstall": "npm --prefix functions run uninstall",
 		"published": "-------------test published file-----------------------",
-		"p-reinstall": "npm --prefix codeForDoc run reinstall && ts-node --project tsconfig.doc.json scripts/installLatest.ts",
-		"p-test": "npm --prefix codeForDoc test"
+		"p-reinstall": "npm --prefix functions run reinstall && ts-node --project tsconfig.doc.json scripts/installLatest.ts",
+		"p-test": "npm --prefix functions test"
 	},
 	"devDependencies": {
 		"@firebase/rules-unit-testing": "^2.0.2",
