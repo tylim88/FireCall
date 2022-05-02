@@ -48,8 +48,8 @@ FireCall standardizes how functions should handle:
 
 - Unauthorized Authentication Error
 - Unknown Error
-- Invalid Request Data Error
-- Invalid Response Data Error
+- Invalid Request Data Error (ZodError)
+- Invalid Response Data Error (ZodError)
 - Validate Request Data With Zod
 - Validate Response Data With Zod
 - error onErrorLogging (only log the error, does not save the error into a file)
@@ -58,6 +58,7 @@ Ensuring:
 
 - always use standard HTTPS Error
 - end point data type safety
+- same function name for both ends.
 
 ## Related Projects
 
