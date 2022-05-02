@@ -4,7 +4,7 @@
 
 <div align="center">
 		<img src="https://raw.githubusercontent.com/tylim88/Firelord/main/img/ozai.png" width="200px"/>
-		<h1>FireCall 烈火唤</h1>
+		<h1>FireCall 烈火唤(Beta)</h1>
 </div>
 
 <div align="center">
@@ -40,6 +40,7 @@
 				alt="package size"
 			/>
 </div>
+<br/>
 
 🔥 Helper Function to write easier and safer Firebase onCall function
 
@@ -223,8 +224,8 @@ By default, FireCall log the necessary information upon error, this is what will
 
 `reqData`: the request data  
 `context`: Firebase function context callable  
-`reqZodError`: may exist, the error that occurs when you try to parse the request data  
-`resZodError`: may exist, the error that occurs when you try to parse the response data  
+`reqZodError`: may exist, the error that occurs when trying to parse the request data  
+`resZodError`: may exist, the error that occurs when trying to parse the response data  
 `err`: may exist, it is the **user defined error** you return to the handler(the response). Its type is unknown until there is user defined error in the response, which mean you don't need to type cast, FireCall will infer all the type for you.
 
 Note: Logging doesn't include saving it to a file or somewhere, it only logs it to the Firebase functions console. If you want to save the errors, then do it within function form.
@@ -263,7 +264,7 @@ const someFunc = onCall(
 			onErrorLogging: ({ context, reqData, reqZodError, resZodError, err }) => {
 				// do something here, eg save to file
 
-				return X // whatever X is, it will get log on console
+				return X // log X on the console
 			},
 		},
 	},
