@@ -217,14 +217,23 @@ const someFunc = onCall(
 
 `func` accept `functions` or `functions.FunctionBuilder`
 
-## Logging Options
+## Error Logging Options
+
+By default, FireCall log the necessary information upon error, this is what will get logged:
+
+`reqData`: the request data  
+`context`: Firebase function context callable  
+`reqZodError`: may exist, the error that occurs when you try to parse the request data  
+`resZodError`: may exist, the error that occurs when you try to parse the response data  
+`err`: may exist, it is the **user defined error** you return to the handler(the response). Its type is unknown until there is user defined error in the response, which mean you don't need to type cast, FireCall will infer all the type for you.
+
+Note: Logging doesn't include saving it to a file or somewhere, it only logs it to the Firebase functions console. If you want to save the errors, then do it within function form.
+
+Normal form:
 
 ```ts
 import { onCall } from 'firecall'
 
-
-
-// normal form
 const someFunc = onCall(
 	someSchema,
 	{
@@ -237,19 +246,21 @@ const someFunc = onCall(
 	},
 	handler
 )
+```
 
 `onErrorLogging`: optional, `boolean | undefined`
 
 Control how you log your error, `false` will not log anything, `true` or `undefined` will log everything.
 
-// Function form
+Function form:
+
+```ts
 const someFunc = onCall(
 	someSchema,
 	{
 		route: 'public', // route is not optional, you can use either 'public' or 'private' value
 		config: {
 			onErrorLogging: ({ context, reqData, reqZodError, resZodError, err }) => {
-
 				// do something here, eg save to file
 
 				return X // whatever X is, it will get log on console
@@ -262,17 +273,9 @@ const someFunc = onCall(
 
 `onErrorLogging`: optional, `({ reqData, context, reqZodError?, resZodError?, err? })=>any`
 
-If you need a finer control, pass a function to it, the function receive an object as arguments, the props is
-
-`reqData`: the request data
-`context`: Firebase function context callable
-`reqZodError`: may exist, the error that occurs when you try to parse the request data
-`resZodError`: may exist, the error that occurs when you try to parse the response data
-`err`: may exist, it is **user defined error** that you return in handler, the type is unknown until there is user defined error in the handler, you don't need to type cast, all types will be inferred.
+If you need a finer control, pass a function to it, the function receive an object that contains all the information you need to log.
 
 Whatever the function return, it will get log on console.
-
-Logging doesn't include saving it to a file or somewhere, it only logs it to the Firebase functions console. If you want to save the errors, then this is a good place to do it.
 
 ## Const Assertion
 
