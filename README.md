@@ -59,6 +59,15 @@ Ensuring:
 - always use standard HTTPS Error
 - end point data type safety
 
+## Related Projects
+
+1. [FirelordJS](https://github.com/tylim88/Firelordjs) - Typescript wrapper for Firestore Web V9
+2. [Firelord](https://github.com/tylim88/Firelord) - Typescript wrapper for Firestore Admin
+3. [Firelordrn](https://github.com/tylim88/firelordrn) - Typescript wrapper for Firestore React Native
+4. [FireLaw](https://github.com/tylim88/firelaw) - Write Firestore security rule with Typescript, utilizing Firelord type engine.
+
+FirelordJS is completed, the rest are still under development.
+
 ## Installation
 
 ```bash
