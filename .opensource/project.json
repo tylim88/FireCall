@@ -1,13 +1,18 @@
 {
-	"name": "FirelordJS",
+	"name": "FireCall",
 
-	"platforms": ["Web"],
+	"platforms": ["Admin"],
 
 	"content": "README.md",
 
 	"pages": [],
 
-	"related": ["tylim88/Firelordrn", "tylim88/Firelord"],
+	"related": [
+		"tylim88/Firelordrn",
+		"tylim88/Firelord",
+		"tylim88/Firelaw",
+		"tylim88/FirelordJS"
+	],
 
 	"tabs": []
 }
