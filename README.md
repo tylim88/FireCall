@@ -284,14 +284,10 @@ You can use const assertion if the handler is returning response from another ca
 ```ts
 import { onCall } from 'firecall'
 
-export const updateMasterPassword = onCall(
-	someSchema,
-	{ route: 'private' },
-	async () => {
-		// return the transaction
-		return await db.runTransaction(async transaction => {
-			return { code: 'ok', data: null } as const // do const assertion here
-		})
-	}
-)
+export const someFun = onCall(someSchema, { route: 'private' }, async () => {
+	// return the transaction
+	return await db.runTransaction(async transaction => {
+		return { code: 'ok', data: null } as const // do const assertion here
+	})
+})
 ```
