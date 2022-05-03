@@ -13,6 +13,15 @@ export type BadCode = ExcludeUnion<functions.https.FunctionsErrorCode, 'ok'>
 
 export type LogType = 'log' | 'info' | 'warn' | 'error'
 
+export type OnErrorLogging<ReqData, ReqZodError, ResZodError, Err> = (
+	details: {
+		code: ExcludeUnion<functions.https.FunctionsErrorCode, 'ok'>
+		message: string
+	} & Details<ReqData, ReqZodError, ResZodError, Err>
+) => unknown
+
+export type ErrorCode = ExcludeUnion<functions.https.FunctionsErrorCode, 'ok'>
+
 /**
  * throw and log https error using functions.logger and functions.https.HttpsError
  * @param settings logger setting and information to log
@@ -25,7 +34,7 @@ export type LogType = 'log' | 'info' | 'warn' | 'error'
  * @param settings.details.resZodError optional, response data zod validation error
  * @param settings.details.err optional user defined error object
  * @param settings.logType optional, 'log' | 'info' | 'warn' | 'error', default is 'error'
- * @param settings.onErrorLogging optional, leave it empty(undefined) or set as true to automatically log {@link settings.details.reqData}, {@link settings.details.context}, {@link settings.details.reqZodError}, {@link settings.details.resZodError} and {@link settings.details.err}. Assign false to not log any of it. You can pass a function that receive {@link settings.details.reqData}, {@link settings.details.context}, {@link settings.details.reqZodError}, {@link settings.details.resZodError} and {@link settings.details.err} as argument, and process your error there eg saving log file, the return of the function be logged.
+ * @param settings.onErrorLogging optional, to log error information, pass a function that receive {@link settings.details.reqData}, {@link settings.details.context}, {@link settings.details.reqZodError}, {@link settings.details.resZodError} and {@link settings.details.err} as argument, and process your error there eg saving log file, the return of the function will be logged. You can return promise.
  * @return never, error thrown with what define in {@link settings.code} adn {@link settings.message}
  */
 export const throwAndLogHttpsError = async <
@@ -34,30 +43,19 @@ export const throwAndLogHttpsError = async <
 	ReqZodError = undefined,
 	ResZodError = undefined
 >(settings: {
-	code: ExcludeUnion<functions.https.FunctionsErrorCode, 'ok'>
+	code: ErrorCode
 	message: string
 	details: Details<ReqData, ReqZodError, ResZodError, Err>
 	logType?: 'log' | 'info' | 'warn' | 'error'
-	onErrorLogging?:
-		| boolean
-		| ((details: {
-				reqData: ReqData
-				context: functions.https.CallableContext
-				reqZodError?: ReqZodError
-				resZodError?: ResZodError
-				err?: Err | undefined
-		  }) => Promise<unknown> | unknown)
+	onErrorLogging?: OnErrorLogging<ReqData, ReqZodError, ResZodError, Err>
 }) => {
 	const { code, message, details, logType, onErrorLogging } = settings
 	functions.logger[logType || 'error']({
 		code,
 		message,
-		details:
-			typeof onErrorLogging === 'function'
-				? { fromOnLoggingCallback: await onErrorLogging(details) }
-				: onErrorLogging === undefined || onErrorLogging === true
-				? details
-				: undefined,
+		details: onErrorLogging
+			? await onErrorLogging({ code, message, ...details })
+			: 'no logging available',
 	})
 	throw new functions.https.HttpsError(code, message)
 }

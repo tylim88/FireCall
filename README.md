@@ -60,6 +60,30 @@ Ensuring:
 - end point data type safety for both ends.(If you use with Firecaller)
 - same function name for both ends. (If you use with Firecaller)
 
+## Why You Need This? What Problem FireCall Trying To Solve?
+
+When coding a callable function (or any endpoint in general), we need to deal with 5 basic errors
+
+1. Unauthenticated error (only for protected route)
+2. invalid request data error
+3. invalid response data error (this is needed if we want to prevent unnecessary data send to front end)
+4. developer defined error, whatever developer do and whatever error he want to throw
+5. unknown error that happen for whatever reason (basically error that is not taken care by developer)
+
+FireCall standardize the way of handling these errors for you.
+
+There is also one common issue where developer often calling the wrong function name which lead to CORS error, basically front end and backend is not tally with each other. So to solve this is we prepare a schema and share it to both front end and back end, by doing this not only we make sure that the function name is correct, but also we make sure that the data type is correct.
+
+It is kind of like how Graphql works, but simpler and we all know how convoluted Graphql is.
+
+Next is how we return error to front end: error handling is chaotic, error handling is hard, error handling make you go nut.
+
+Some developer return error as 200 response and attach his own error code and message as data, and imagine every developer return his unique format of error, this is not fun.
+
+With FireCall, no more "you return your error, I return my error, he return his error", everybody simply return a god damn standard HTTPS error.
+
+Long thing short, FireCall make sure that there is only one way to do stuff.
+
 ## Related Projects
 
 1. [FirelordJS](https://github.com/tylim88/Firelordjs) - Typescript wrapper for Firestore Web V9
@@ -191,7 +215,7 @@ exp({ updateUser, getUser }).forEach(func => {
 })
 ```
 
-if everything in `someOtherFile` is FireCall function, you can write something like this
+If everything in `someOtherFile` is FireCall function, you can write something like this
 
 ```ts
 import * as allFunc from './someOtherFile'
@@ -230,40 +254,9 @@ const someFunc = onCall(
 
 ## Error Logging Options
 
-By default, FireCall log the necessary information upon error, this is what will get logged:
+By default, FireCall do not log the necessary information upon error. Pass a function to config.onErrorLogging.
 
-`reqData`: the request data  
-`context`: Firebase function context callable  
-`reqZodError`: may exist, the error that occurs when trying to parse the request data  
-`resZodError`: may exist, the error that occurs when trying to parse the response data  
-`err`: may exist, it is the **user defined error** you return to the handler(the response). Its type is unknown until there is user defined error in the response, which mean you don't need to type cast, FireCall will infer all the type for you.
-
-Note: Logging doesn't include saving it to a file or somewhere, it only logs it to the Firebase functions console. If you want to save the errors, then do it within function form.
-
-Normal form:
-
-```ts
-import { onCall } from 'firecall'
-
-const someFunc = onCall(
-	someSchema,
-	{
-		route: 'public', // route is not optional, you can use either 'public' or 'private' value
-		config: {
-			onErrorLogging: false, // will not log anything when error occurs
-			onErrorLogging: true, // will log everything when error occurs
-			onErrorLogging: undefined, // will log anything when error occurs
-		},
-	},
-	handler
-)
-```
-
-`onErrorLogging`: optional, `boolean | undefined`
-
-Control how you log your error, `false` will not log anything, `true` or `undefined` will log everything.
-
-Function form:
+Do this if you want to log:
 
 ```ts
 const someFunc = onCall(
@@ -284,9 +277,15 @@ const someFunc = onCall(
 
 `onErrorLogging`: optional, `({ reqData, context, reqZodError?, resZodError?, err? })=>any`
 
-If you need a finer control, pass a function to it, the function receive an object that contains all the information you need to log.
+`reqData`: the request data  
+`context`: Firebase function context callable  
+`reqZodError`: may exist, the error that occurs when trying to parse the request data  
+`resZodError`: may exist, the error that occurs when trying to parse the response data  
+`err`: may exist, it is the **user defined error** you return to the handler(the response). Its type is unknown until there is user defined error in the response, which mean you don't need to type cast, FireCall will infer all the type for you.
 
-Whatever the function return, it will get logged on console.
+Note: Logging doesn't include saving it to a file or somewhere, it only logs it to the Firebase functions console. If you want to save the errors, then do it within function form.
+
+Whatever the function return, it will get logged on the console.
 
 ## Const Assertion
 
@@ -302,3 +301,41 @@ export const someFun = onCall(someSchema, { route: 'private' }, async () => {
 	})
 })
 ```
+
+## Change Built In Error Message
+
+Here is how you change the built in error message:
+
+```ts
+const someFunc = onCall(
+	someSchema,
+	{
+		route: 'public', // route is not optional, you can use either 'public' or 'private' value
+		config: {
+			changeBuiltInErrorCodeAndMessage: {
+				unauthenticated: {
+					code: 'someCode' // default unauthenticated
+					message: 'someMessage' // default Please Login First
+				},
+				unknown: {
+					code: 'someCode' // default unknown
+					message: 'someMessage' // default unknown
+				},
+				resZodError: {
+					code: 'someCode' // default invalid-argument
+					message: 'someMessage' // default invalid-argument
+				},
+				reqZodError: {
+					code: 'someCode' // default internal
+					message: 'someMessage' // default invalid response
+				}
+			},
+		},
+	},
+	handler
+)
+```
+
+Every prop of `changeBuiltInErrorCodeAndMessage` is optional, if no values are supplied, it uses default codes and messages.
+
+The `code` value is limited to [Firebase Functions Error Code](https://firebase.google.com/docs/reference/node/firebase.functions#functionserrorcode) except 'ok'.

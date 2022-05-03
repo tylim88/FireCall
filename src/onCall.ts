@@ -2,9 +2,10 @@ import * as functions from 'firebase-functions'
 import { z } from 'zod'
 import {
 	throwAndLogHttpsError,
-	Details,
 	BadCode,
 	LogType,
+	OnErrorLogging,
+	ErrorCode,
 } from './throwAndLogHttpsError'
 import { NonNullableKey } from './types'
 import { Schema, onCallObj } from './exp'
@@ -39,7 +40,7 @@ type Rot<Route extends 'private' | 'public'> = Route extends 'private'
  * @param schema.name name of the function
  * @param config functions setting
  * @param config.route private route or public route, private = need authentication, public = not need authentication.
- * @param settings.onErrorLogging optional, leave it empty(undefined) or set as true to automatically log {@link settings.details.reqData}, {@link settings.details.context}, {@link settings.details.reqZodError}, {@link settings.details.resZodError} and {@link settings.details.err}. Assign false to not log any of it. You can pass a function that receive {@link settings.details.reqData}, {@link settings.details.context}, {@link settings.details.reqZodError}, {@link settings.details.resZodError} and {@link settings.details.err} as argument, and process your error there eg saving log file, the return of the function be logged.
+ * @param settings.onErrorLogging optional, to log error information, pass a function that receive {@link settings.details.reqData}, {@link settings.details.context}, {@link settings.details.reqZodError}, {@link settings.details.resZodError} and {@link settings.details.err} as argument, and process your error there eg saving log file, the return of the function will be logged. You can return promise.
  * @param config.doNotExport optional, if this is true, then `exp` will not export the function.
  * @param config.functions optional, insert firebase function builder here.
  * @param handler onCall handler, receive request data and callable context as argument
@@ -57,39 +58,58 @@ export const onCall = <
 	schema: S,
 	config: {
 		route: Route
-		onErrorLogging?:
-			| boolean
-			| ((
-					details: Details<
-						z.infer<S['req']>,
-						z.ZodError<z.infer<S['req']>>,
-						z.ZodError<z.infer<S['res']>>,
-						ReturnType<Handler> extends Ret<S, ResData>
-							? ReturnType<Handler> extends BadRes
-								? ReturnType<Handler>['err']
-								: never
-							: ReturnType<Handler> extends Promise<infer P>
-							? P extends Ret<S, ResData>
-								? P extends BadRes
-									? P['err']
-									: never
-								: never
-							: never
-					>
-			  ) => unknown)
+		onErrorLogging?: OnErrorLogging<
+			z.infer<S['req']>,
+			z.ZodError<z.infer<S['req']>>,
+			z.ZodError<z.infer<S['res']>>,
+			ReturnType<Handler> extends Ret<S, ResData>
+				? ReturnType<Handler> extends BadRes
+					? ReturnType<Handler>['err']
+					: never
+				: ReturnType<Handler> extends Promise<infer P>
+				? P extends Ret<S, ResData>
+					? P extends BadRes
+						? P['err']
+						: never
+					: never
+				: never
+		>
+		changeBuiltInErrorCodeAndMessage?: {
+			unauthenticated?: {
+				code?: ErrorCode
+				message?: string
+			}
+			unknown?: {
+				code?: ErrorCode
+				message?: string
+			}
+			resZodError?: {
+				code?: ErrorCode
+				message?: string
+			}
+			reqZodError?: {
+				code?: ErrorCode
+				message?: string
+			}
+		}
 		doNotExport?: boolean
 		func?: functions.FunctionBuilder | typeof functions
 	},
 	handler: Handler
 ): onCallObj => {
-	const { route, onErrorLogging, func } = config
+	const { route, onErrorLogging, func, changeBuiltInErrorCodeAndMessage } =
+		config
 	const onCall = (func || functions).https.onCall(async (data, context) => {
 		const reqData = data as z.infer<S['req']>
 		// auth validation
 		if (!context.auth && route === 'private') {
 			throwAndLogHttpsError({
-				code: 'unauthenticated',
-				message: 'Please Login First',
+				code:
+					changeBuiltInErrorCodeAndMessage?.unauthenticated?.code ||
+					'unauthenticated',
+				message:
+					changeBuiltInErrorCodeAndMessage?.unauthenticated?.message ||
+					'Please Login First',
 				details: { reqData, context },
 				onErrorLogging,
 			})
@@ -99,8 +119,12 @@ export const onCall = <
 			schema.req.parse(reqData)
 		} catch (zodError) {
 			throwAndLogHttpsError({
-				code: 'invalid-argument',
-				message: 'invalid-argument',
+				code:
+					changeBuiltInErrorCodeAndMessage?.reqZodError?.code ||
+					'invalid-argument',
+				message:
+					changeBuiltInErrorCodeAndMessage?.reqZodError?.message ||
+					'invalid-argument',
 				details: {
 					reqData,
 					context,
@@ -115,8 +139,9 @@ export const onCall = <
 		).catch(err => {
 			// throw unknown error
 			return throwAndLogHttpsError({
-				code: 'unknown',
-				message: 'unknown error',
+				code: changeBuiltInErrorCodeAndMessage?.unknown?.code || 'unknown',
+				message:
+					changeBuiltInErrorCodeAndMessage?.unknown?.message || 'unknown',
 				details: { reqData, context, err },
 				onErrorLogging,
 			})
@@ -127,8 +152,11 @@ export const onCall = <
 				schema.res.parse(res.data)
 			} catch (zodError) {
 				throwAndLogHttpsError({
-					code: 'internal',
-					message: 'output data malformed',
+					code:
+						changeBuiltInErrorCodeAndMessage?.resZodError?.code || 'internal',
+					message:
+						changeBuiltInErrorCodeAndMessage?.resZodError?.message ||
+						'invalid response',
 					details: {
 						reqData,
 						context,
