@@ -72,7 +72,9 @@ When coding a callable function (or any endpoint in general), we need to deal wi
 
 FireCall standardize the way of handling these errors for you.
 
-There is also one common issue where developer often calling the wrong function name which lead to CORS error, basically front end and backend is not tally with each other. So to solve this is we prepare a schema and share it to both front end and back end, by doing this not only we make sure that the function name is correct, but also we make sure that the data type is correct.
+There is also one common issue where developer often calling the wrong function name which lead to CORS error, basically front end and backend is not tally with each other.
+
+So to solve this is we prepare a schema and share it to both front end and back end, by doing this not only we make sure that the function name is correct, but also we make sure that the data type is correct.
 
 It is kind of like how Graphql works, but simpler and we all know how convoluted Graphql is.
 
