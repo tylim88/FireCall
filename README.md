@@ -52,13 +52,13 @@ FireCall standardizes how functions should handle:
 - Invalid Response Data Error (ZodError)
 - Validate Request Data With Zod
 - Validate Response Data With Zod
-- error onErrorLogging (only log the error, does not save the error into a file)
+- error logging (only log the error, does not save the error into a file)
 
 Ensuring:
 
 - always use standard HTTPS Error
-- end point data type safety
-- same function name for both ends.
+- end point data type safety for both ends.(If you use with Firecaller)
+- same function name for both ends. (If you use with Firecaller)
 
 ## Related Projects
 
@@ -286,7 +286,7 @@ const someFunc = onCall(
 
 If you need a finer control, pass a function to it, the function receive an object that contains all the information you need to log.
 
-Whatever the function return, it will get log on console.
+Whatever the function return, it will get logged on console.
 
 ## Const Assertion
 
