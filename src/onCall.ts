@@ -39,7 +39,7 @@ type Rot<Route extends 'private' | 'public'> = Route extends 'private'
  * @param schema.name name of the function
  * @param config functions setting
  * @param config.route private route or public route, private = need authentication, public = not need authentication.
- * @param config.onErrorLogging optional, leave it empty(undefined) or set as true to automatically log {@link settings.details.reqData}, {@link settings.details.context} and {@link settings.details.zodError}(if available). Assign false to not log any of it. You can pass a function that receive {@link settings.details.reqData}, {@link settings.details.context} and {@link settings.details.zodError} as argument, and process your error there eg saving log file), the return of the function be logged.
+ * @param settings.onErrorLogging optional, leave it empty(undefined) or set as true to automatically log {@link settings.details.reqData}, {@link settings.details.context}, {@link settings.details.reqZodError}, {@link settings.details.resZodError} and {@link settings.details.err}. Assign false to not log any of it. You can pass a function that receive {@link settings.details.reqData}, {@link settings.details.context}, {@link settings.details.reqZodError}, {@link settings.details.resZodError} and {@link settings.details.err} as argument, and process your error there eg saving log file, the return of the function be logged.
  * @param config.doNotExport optional, if this is true, then `exp` will not export the function.
  * @param config.functions optional, insert firebase function builder here.
  * @param handler onCall handler, receive request data and callable context as argument
