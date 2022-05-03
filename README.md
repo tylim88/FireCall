@@ -172,7 +172,7 @@ If the response is ok, handler must return object with `code` and `data` propert
 `code`: 'ok'  
 `data`: value that has same type as type you define in schema.res
 
-if the response is not ok, handler must return object with `code`, `message` and `err` property, where  
+if the response is not ok, handler must return object with `code` and `message` properties, and an optional `err` property, where  
 `code`: [Firebase Functions Error Code](https://firebase.google.com/docs/reference/node/firebase.functions#functionserrorcode) except 'ok'  
 `message`: string  
 `err`: optional, **user defined error**, put anything you want here, normally the error object or just skip it
