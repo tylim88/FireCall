@@ -60,7 +60,9 @@ Ensuring:
 - end point data type safety for both ends.(If you use with Firecaller)
 - same function name for both ends. (If you use with Firecaller)
 
-## Why You Need This? What Problem FireCall Trying To Solve?
+Optional: For maximum benefit, please use [FireCaller](https://github.com/tylim88/firecaller) in front end.
+
+## Why Do You Need This? What Is The Problem FireCall Trying To Solve?
 
 When coding a callable function (or any endpoint in general), we need to deal with 5 basic errors
 
