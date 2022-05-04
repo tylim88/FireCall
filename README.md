@@ -39,11 +39,12 @@
 				src="https://img.shields.io/badge/gzipped-2KB-brightgreen"
 				alt="package size"
 			/>
+			<br/>
+			<br/>
+			<p>🔥 Write callable functions systematically like a Firelord. No more chaotic error handling, no more unsafe endpoint data type, no more messy validation. Be the Master of Fire you always wanted to be.</p>
 </div>
 <br/>
-
-🔥 Helper Function to write easier and safer Firebase onCall function
-
+<br/>
 FireCall standardizes how functions should handle:
 
 - Unauthorized Authentication Error

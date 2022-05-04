@@ -1,7 +1,7 @@
 {
 	"name": "firecall",
-	"version": "0.2.2",
-	"description": "🔥 Write Firebase on call function code in a scalable way. Standardize validation and error logging. Enforce type safety of function naming and data on compile time and runtime.",
+	"version": "0.2.3",
+	"description": "🔥Write callable functions systematically like a Firelord. No more chaotic error handling, no more unsafe endpoint data type, no more messy validation. Be the Master of Fire you always wanted to be.",
 	"source": "src/index.ts",
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
