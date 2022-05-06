@@ -3,7 +3,6 @@ import { z } from 'zod'
 import {
 	throwAndLogHttpsError,
 	BadCode,
-	LogType,
 	OnErrorLogging,
 	ErrorCode,
 } from './throwAndLogHttpsError'
@@ -13,7 +12,6 @@ import { Schema, onCallObj } from './exp'
 type BadRes = {
 	code: BadCode
 	message: string
-	logType?: LogType
 	err?: unknown
 }
 
@@ -172,7 +170,6 @@ export const onCall = <
 				code: res.code,
 				details: { reqData, context, err: res.err as never },
 				message: res.message,
-				logType: res.logType,
 				onErrorLogging,
 			})
 		}
