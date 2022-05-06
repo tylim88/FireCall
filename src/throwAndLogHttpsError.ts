@@ -18,7 +18,7 @@ export type OnErrorLogging<ReqData, ReqZodError, ResZodError, Err> = (
 		code: ExcludeUnion<functions.https.FunctionsErrorCode, 'ok'>
 		message: string
 	} & Details<ReqData, ReqZodError, ResZodError, Err>
-) => unknown
+) => Record<string, unknown> & { logType?: LogType }
 
 export type ErrorCode = ExcludeUnion<functions.https.FunctionsErrorCode, 'ok'>
 
@@ -46,16 +46,18 @@ export const throwAndLogHttpsError = async <
 	code: ErrorCode
 	message: string
 	details: Details<ReqData, ReqZodError, ResZodError, Err>
-	logType?: 'log' | 'info' | 'warn' | 'error'
 	onErrorLogging?: OnErrorLogging<ReqData, ReqZodError, ResZodError, Err>
 }) => {
-	const { code, message, details, logType, onErrorLogging } = settings
+	const { code, message, details, onErrorLogging } = settings
+
+	const { logType, ...rest } = onErrorLogging
+		? await onErrorLogging({ code, message, ...details })
+		: ({} as ReturnType<OnErrorLogging<ReqData, ReqZodError, ResZodError, Err>>)
+
 	functions.logger[logType || 'error']({
 		code,
 		message,
-		details: onErrorLogging
-			? await onErrorLogging({ code, message, ...details })
-			: 'no logging available',
+		details: rest,
 	})
 	throw new functions.https.HttpsError(code, message)
 }

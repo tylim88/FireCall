@@ -273,7 +273,7 @@ const someFunc = onCall(
 			onErrorLogging: ({ context, reqData, reqZodError, resZodError, err }) => {
 				// do something here, eg save to file
 
-				return X // log X on the console
+				return X // log X on the console, X is an object literal
 			},
 		},
 	},
@@ -281,7 +281,7 @@ const someFunc = onCall(
 )
 ```
 
-`onErrorLogging`: optional, `({ reqData, context, reqZodError?, resZodError?, err? })=>any`
+`onErrorLogging`: optional, `({ reqData, context, reqZodError?, resZodError?, err? })=> Record<string,unknown> & { logType?: 'log' | 'info' | 'warn' | 'error' }`
 
 `reqData`: the request data  
 `context`: Firebase function context callable  
@@ -291,7 +291,9 @@ const someFunc = onCall(
 
 Note: Logging doesn't include saving it to a file or somewhere, it only logs it to the Firebase functions console. If you want to save the errors, then do it within function form.
 
-Whatever the function return, it will get logged on the console.
+Whatever object literal the function return and(empty object = nothing to log) get logged on the console, except the `logType` props.
+
+`logType` props is an optional prop that set the type of your log, by default it is `error`.
 
 ## Const Assertion
 
