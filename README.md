@@ -147,8 +147,6 @@ Long thing short, FireCall make sure that there is only one way to do stuff and 
 3. [Firelordrn](https://github.com/tylim88/firelordrn) - Typescript wrapper for Firestore React Native
 4. [FireLaw](https://github.com/tylim88/firelaw) - Write Firestore security rule with Typescript, utilizing Firelord type engine.
 
-FirelordJS is completed, the rest are still under development.
-
 ## Installation
 
 ```bash
