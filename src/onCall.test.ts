@@ -1,16 +1,10 @@
 // @ts-ignore
 import { onCall } from './onCall'
-import env from '../env.json'
 import { z } from 'zod'
 import fftest from 'firebase-functions-test'
 import * as functions from 'firebase-functions'
 
-const test = fftest(
-	{
-		projectId: env.projects.default,
-	},
-	'path/to/serviceAccountKey.json'
-)
+const test = fftest()
 
 const schema = { req: z.string(), res: z.string(), name: 'test' }
 
