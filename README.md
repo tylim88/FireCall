@@ -4,7 +4,7 @@
 
 <div align="center">
 		<img src="https://raw.githubusercontent.com/tylim88/Firelord/main/img/ozai.png" width="200px"/>
-		<h1>FireCall 烈火唤(Beta)</h1>
+		<h1>FireCall 烈火唤</h1>
 </div>
 
 <div align="center">
@@ -39,6 +39,54 @@
 				src="https://img.shields.io/badge/gzipped-2KB-brightgreen"
 				alt="package size"
 			/>
+			&nbsp;
+			<a href="https://github.com/tylim88/FireCall/actions" target="_blank">
+				<img
+					src="https://github.com/tylim88/FireCall/workflows/Main/badge.svg"
+					alt="github action"
+				/>
+			</a>
+			&nbsp;
+			<a href="https://codecov.io/gh/tylim88/FireCall" target="_blank">
+				<img
+					src="https://codecov.io/gh/tylim88/FireCall/branch/main/graph/badge.svg"
+					alt="code coverage"
+				/>
+			</a>
+			&nbsp;
+			<a href="https://github.com/tylim88/FireCall/issues" target="_blank">
+				<img
+					alt="GitHub issues"
+					src="https://img.shields.io/github/issues-raw/tylim88/FireCall"
+				></img>
+			</a>
+			&nbsp;
+			<a href="https://snyk.io/test/github/tylim88/FirelordJS" target="_blank">
+				<img
+					src="https://snyk.io/test/github/tylim88/FirelordJS/badge.svg"
+					alt="code coverage"
+				/>
+			</a>
+			&nbsp;
+			<a
+				href="https://lgtm.com/projects/g/tylim88/FireCall/alerts/"
+				target="_blank"
+			>
+				<img
+					alt="Total alerts"
+					src="https://img.shields.io/lgtm/alerts/g/tylim88/FireCall.svg?logo=lgtm&logoWidth=18"
+				/>
+			</a>
+			&nbsp;
+			<a
+				href="https://lgtm.com/projects/g/tylim88/FireCall/context:javascript"
+				target="_blank"
+			>
+				<img
+					alt="Language grade: JavaScript"
+					src="https://img.shields.io/lgtm/grade/javascript/g/tylim88/FireCall.svg?logo=lgtm&logoWidth=18"
+				/>
+			</a>
 			<br/>
 			<br/>
 			<p>🔥 Write callable functions systematically like a Firelord. No more chaotic error handling, no more unsafe endpoint data type, no more messy validation. Be the Master of Fire you always wanted to be.</p>
@@ -63,6 +111,8 @@ Ensuring:
 - same function name for both ends. (If you use with Firecaller)
 
 Optional: For maximum benefit, please use [FireCaller](https://github.com/tylim88/firecaller) in front end.
+
+support [firebase-functions-test](#firebase-function-test):
 
 ## Why Do You Need This? What Is The Problem FireCall Trying To Solve?
 
@@ -92,7 +142,7 @@ Long thing short, FireCall make sure that there is only one way to do stuff and 
 
 ## Related Projects
 
-1. [FirelordJS](https://github.com/tylim88/Firelordjs) - Typescript wrapper for Firestore Web V9
+1. [FirelordJS](https://github.com/tylim88/FireCall) - Typescript wrapper for Firestore Web V9
 2. [Firelord](https://github.com/tylim88/Firelord) - Typescript wrapper for Firestore Admin
 3. [Firelordrn](https://github.com/tylim88/firelordrn) - Typescript wrapper for Firestore React Native
 4. [FireLaw](https://github.com/tylim88/firelaw) - Write Firestore security rule with Typescript, utilizing Firelord type engine.
@@ -233,6 +283,76 @@ exp(allFunc).forEach(func => {
 })
 ```
 
+## Firebase Function Test
+
+You can use FireCall with [firebase-functions-test](https://firebase.google.com/docs/functions/unit-testing):
+
+ok test example:
+
+```ts
+const wrapped = test.wrap(
+	onCall(
+		schema,
+		{
+			route: 'private',
+		},
+		async () => {
+			return { code: 'ok', data: 'okie' }
+		}
+	).onCall
+)
+await expect(wrapped('123', { auth: { uid: '123' } })).resolves.toEqual('okie')
+```
+
+error tests examples:
+
+```ts
+const wrapped = test.wrap(
+	onCall(
+		schema,
+		{
+			route: 'private',
+		},
+		() => {
+			return { code: 'cancelled', message: 'cancelled' }
+		}
+	).onCall
+)
+await expect(wrapped('123', { auth: { uid: '123' } })).rejects.toEqual(
+	new functions.https.HttpsError('cancelled', 'cancelled')
+)
+
+const wrapped = test.wrap(
+	onCall(
+		schema,
+		{
+			route: 'private',
+		},
+		async () => {
+			return { code: 'ok', data: 'okRes' }
+		}
+	).onCall
+)
+await expect(wrapped('123')).rejects.toEqual(
+	new functions.https.HttpsError('unauthenticated', 'Please Login First')
+)
+```
+
+## Const Assertion
+
+You can use const assertion if the handler is returning response from another callback, example from the transaction.
+
+```ts
+import { onCall } from 'firecall'
+
+export const someFun = onCall(someSchema, { route: 'private' }, async () => {
+	// return the transaction
+	return await db.runTransaction(async transaction => {
+		return { code: 'ok', data: null } as const // do const assertion here
+	})
+})
+```
+
 ## Function Builder
 
 If you need custom setting for you function like changing ram or region, you can pass function builder to `onCall` config.
@@ -294,21 +414,6 @@ Note: Logging doesn't include saving it to a file or somewhere, it only logs it 
 Whatever object literal the function return and(empty object = nothing to log) get logged on the console, except the `logType` props.
 
 `logType` props is an optional prop that set the type of your log, by default it is `error`.
-
-## Const Assertion
-
-You can use const assertion if the handler is returning response from another callback, example from the transaction.
-
-```ts
-import { onCall } from 'firecall'
-
-export const someFun = onCall(someSchema, { route: 'private' }, async () => {
-	// return the transaction
-	return await db.runTransaction(async transaction => {
-		return { code: 'ok', data: null } as const // do const assertion here
-	})
-})
-```
 
 ## Change Built In Error Message
 

@@ -22,11 +22,15 @@ tsconfig.json
 .eslintrc.js
 .prettierrc.js
 babel.config.js    
-.env
 jest.config.doc.js
 tsconfig.doc.json
 lgtm.yml
 tsconfig.prod.json
+
+# env
+env.json
+.env
+.firebaserc
 
 # types
 /types/**/*
@@ -41,5 +45,4 @@ CHANGELOG.md
 package-lock.json
 firebase.json
 .eslintignore
-.firebaserc
 note.txt
