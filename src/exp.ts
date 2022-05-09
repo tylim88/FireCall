@@ -8,7 +8,9 @@ export type Schema = {
 }
 
 export type onCallObj = {
-	onCall: functions.HttpsFunction & functions.Runnable<unknown>
+	onCall: functions.HttpsFunction &
+		functions.Runnable<// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		any>
 	schema: Schema
 	config: { doNotExport?: boolean }
 }

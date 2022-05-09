@@ -2,12 +2,14 @@ import { onCall } from './onCall'
 import { z } from 'zod'
 import { IsTrue, IsSame } from './types'
 
-describe('test some types', () => {
-	it('check onErrorLogging type', () => {
+const schema = { name: 'experiment', req: z.string(), res: z.string() }
+
+describe('test types', () => {
+	it('check onErrorLogging err type', () => {
 		const errObj = 12121245 as const
 		;() =>
 			onCall(
-				{ name: 'experiment', req: z.string(), res: z.string() },
+				schema,
 				{
 					route: 'private',
 					onErrorLogging: ({
@@ -22,8 +24,35 @@ describe('test some types', () => {
 					},
 				},
 				async () => {
-					return { code: 'aborted', message: '', err: errObj }
+					const a = true
+					if (a) {
+						return { code: 'aborted', message: '', err: errObj }
+					} else {
+						return { code: 'ok', data: '123' }
+					}
 				}
 			)
+
+		onCall(
+			schema,
+			{
+				route: 'private',
+			},
+			// @ts-expect-error
+			async () => {
+				return { code: 'aborted', data: '123' }
+			}
+		)
+
+		onCall(
+			schema,
+			{
+				route: 'private',
+			},
+			// @ts-expect-error
+			async () => {
+				return { code: 'ok', data: 123 }
+			}
+		)
 	})
 })

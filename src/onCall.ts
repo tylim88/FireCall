@@ -101,7 +101,7 @@ export const onCall = <
 		const reqData = data as z.infer<S['req']>
 		// auth validation
 		if (!context.auth && route === 'private') {
-			throwAndLogHttpsError({
+			await throwAndLogHttpsError({
 				code:
 					changeBuiltInErrorCodeAndMessage?.unauthenticated?.code ||
 					'unauthenticated',
@@ -116,7 +116,7 @@ export const onCall = <
 		try {
 			schema.req.parse(reqData)
 		} catch (zodError) {
-			throwAndLogHttpsError({
+			await throwAndLogHttpsError({
 				code:
 					changeBuiltInErrorCodeAndMessage?.reqZodError?.code ||
 					'invalid-argument',
@@ -131,10 +131,10 @@ export const onCall = <
 				onErrorLogging,
 			})
 		}
-
-		const res = await Promise.resolve(
-			handler(reqData, context as Rot<Route>)
-		).catch(err => {
+		const res = await (async () => {
+			// change sync/async function to async
+			return handler(reqData, context as Rot<Route>)
+		})().catch(async err => {
 			// throw unknown error
 			return throwAndLogHttpsError({
 				code: changeBuiltInErrorCodeAndMessage?.unknown?.code || 'unknown',
@@ -149,7 +149,7 @@ export const onCall = <
 			try {
 				schema.res.parse(res.data)
 			} catch (zodError) {
-				throwAndLogHttpsError({
+				await throwAndLogHttpsError({
 					code:
 						changeBuiltInErrorCodeAndMessage?.resZodError?.code || 'internal',
 					message:
@@ -166,7 +166,7 @@ export const onCall = <
 			return res.data
 		} else {
 			// thrown known error
-			throwAndLogHttpsError({
+			await throwAndLogHttpsError({
 				code: res.code,
 				details: { reqData, context, err: res.err as never },
 				message: res.message,
