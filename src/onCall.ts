@@ -43,7 +43,7 @@ type Rot<Route extends 'private' | 'public'> = Route extends 'private'
  * @param config.func optional, insert firebase function builder here.
  * @param config.changeBuiltInErrorCodeAndMessage optional, change default error code and message, please check doc for details
  * @param handler onCall handler, receive request data and callable context as argument
- * @returns object contains name, schema, the created firebase function onCall and config
+ * @returns object contains the functions name: `name` and the onCall:`onCall`
  */
 export const onCall = <
 	S extends Schema,
