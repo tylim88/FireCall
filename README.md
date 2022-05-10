@@ -302,7 +302,7 @@ const wrapped = test.wrap(
 await expect(wrapped('123', { auth: { uid: '123' } })).resolves.toEqual('okie')
 ```
 
-error tests examples:
+error test examples:
 
 ```ts
 const wrapped = test.wrap(
