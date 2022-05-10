@@ -40,9 +40,10 @@ type Rot<Route extends 'private' | 'public'> = Route extends 'private'
  * @param config.route private route or public route, private = need authentication, public = not need authentication.
  * @param settings.onErrorLogging optional, to log error information, pass a function that receive {@link settings.details.reqData}, {@link settings.details.context}, {@link settings.details.reqZodError}, {@link settings.details.resZodError} and {@link settings.details.err} as argument, and process your error there eg saving log file, the return of the function will be logged. You can return promise.
  * @param config.doNotExport optional, if this is true, then `exp` will not export the function.
- * @param config.functions optional, insert firebase function builder here.
+ * @param config.func optional, insert firebase function builder here.
+ * @param config.changeBuiltInErrorCodeAndMessage optional, change default error code and message, please check doc for details
  * @param handler onCall handler, receive request data and callable context as argument
- * @returns object contains name, schema, the created firebase function onCall and config
+ * @returns object contains the functions name: `name` and the onCall:`onCall`
  */
 export const onCall = <
 	S extends Schema,
