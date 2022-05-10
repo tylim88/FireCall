@@ -11,6 +11,7 @@
 /.husky
 /scripts
 /src
+/functions
 
 # ignore file
 .gitignore
@@ -26,6 +27,7 @@ jest.config.doc.js
 tsconfig.doc.json
 lgtm.yml
 tsconfig.prod.json
+.parcelrc
 
 # env
 env.json
@@ -45,4 +47,6 @@ CHANGELOG.md
 package-lock.json
 firebase.json
 .eslintignore
+.firebaserc
 note.txt
+firebase.json
