@@ -153,7 +153,7 @@ Long thing short, FireCall make sure that there is only one way to do stuff and 
 npm install firecall zod firebase-functions
 ```
 
-and of course you need `Typescript`.
+and of course you need `typescript`.
 
 ## Create Schema With Zod
 
