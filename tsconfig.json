@@ -8,7 +8,7 @@
 		"noImplicitAny": true,
 		"forceConsistentCasingInFileNames": true,
 		"strict": true,
-		"target": "es5",
+		"target": "es2017",
 		"allowJs": true,
 		"emitDeclarationOnly": false,
 		"outDir": "dist",
