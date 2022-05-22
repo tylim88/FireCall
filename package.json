@@ -1,6 +1,6 @@
 {
 	"name": "firecall",
-	"version": "1.0.7",
+	"version": "1.0.8",
 	"description": "🔥Write callable functions systematically like a Firelord. No more chaotic error handling, no more unsafe endpoint data type, no more messy validation. Be the Master of Fire you always wanted to be.",
 	"source": "src/index.ts",
 	"main": "dist/index.js",
@@ -19,7 +19,7 @@
 		"test": "rm -rf coverage && jest --forceExit",
 		"parcel": "rm -rf dist && tsc --emitDeclarationOnly true && parcel build",
 		"build": "rm -rf dist && tsc",
-		"link": "npm link && npm link firelordjs",
+		"link": "npm run build && npm link",
 		"pub": "npm run build && npm publish --tag beta",
 		"dev": "---------------------dev------------------------",
 		"d-test": "tsc && npm test"

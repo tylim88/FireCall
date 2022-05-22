@@ -150,18 +150,10 @@ Long thing short, FireCall make sure that there is only one way to do stuff and 
 ## Installation
 
 ```bash
-npm i firecall zod firebase-functions regenerator-runtime
+npm i firecall zod firebase-functions
 ```
 
 and of course you need `typescript`.
-
-Add this to your very first line of code
-
-```ts
-import 'regenerator-runtime/runtime'
-```
-
-You only need to add this line once
 
 ## Create Schema With Zod
 
