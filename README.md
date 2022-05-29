@@ -126,19 +126,19 @@ When coding a callable function (or any endpoint in general), we need to deal wi
 
 Error handling is chaotic, error handling is hard, error handling make you go nut.
 
-Some developer return error as 200 response and attach his own error code and message as data, and imagine every developer return his unique format of error, this is not fun.
+Some developer return error as 200 response and attach his own error code and message as data, now imagine every developer return his unique format of error, this is not fun.
 
 With FireCall, no more "you return your error, I return my error, he return his error", everybody simply return a god damn standard HTTPS error.
 
 FireCall standardize the way of handling these errors for you.
 
-There is also one common issue where developer often calling the wrong function name which lead to CORS error, basically front end and backend is not tally with each other.
+There is also one common issue where developer often calling the wrong function name which lead to CORS error, basically front end and backend are not tally with each other.
 
 So to solve this is we prepare a schema and share it to both front end and back end, by doing this not only we make sure that the function name is correct, but also we make sure that the data type is correct.
 
 It is very similar to how Graphql schema sharing works, but way much simpler and we all know how convoluted Graphql is.
 
-Long thing short, FireCall make sure that there is only one way to do stuff and giving you absolute type safe on both compile and run time.
+Long thing short, FireCall make sure that there is only one way to do stuff and giving you absolute type safe at both compile and run time.
 
 ## Related Projects
 
