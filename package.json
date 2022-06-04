@@ -1,6 +1,6 @@
 {
 	"name": "firecall",
-	"version": "1.0.10",
+	"version": "1.0.11",
 	"description": "🔥Write callable functions systematically like a Firelord. No more chaotic error handling, no more unsafe endpoint data type, no more messy validation. Be the Master of Fire you always wanted to be.",
 	"source": "src/index.ts",
 	"main": "dist/index.js",
@@ -37,6 +37,7 @@
 		"eslint-import-resolver-typescript": "^2.7.1",
 		"eslint-plugin-import": "^2.26.0",
 		"eslint-plugin-prettier": "^4.0.0",
+		"firebase-functions": "^3.21.2",
 		"firebase-functions-test": "^2.0.2",
 		"husky": "^8.0.1",
 		"jest": "^28.1.0",
@@ -64,8 +65,5 @@
 	"bugs": {
 		"url": "https://github.com/tylim88/FireCall/issues"
 	},
-	"homepage": "https://github.com/tylim88/FireCall#readme",
-	"dependencies": {
-		"firebase-functions": "^3.21.1"
-	}
+	"homepage": "https://github.com/tylim88/FireCall#readme"
 }

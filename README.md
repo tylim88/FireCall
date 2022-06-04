@@ -307,7 +307,9 @@ const wrapped = test.wrap(
 		}
 	).onCall
 )
-await expect(wrapped('123', { auth: { uid: '123' } })).resolves.toEqual('okie')
+await expect(wrapped('someData', { auth: { uid: '123' } })).resolves.toEqual(
+	'okie'
+)
 ```
 
 error test examples:
@@ -324,7 +326,7 @@ const wrapped = test.wrap(
 		}
 	).onCall
 )
-await expect(wrapped('123', { auth: { uid: '123' } })).rejects.toEqual(
+await expect(wrapped('someData', { auth: { uid: '123' } })).rejects.toEqual(
 	new functions.https.HttpsError('cancelled', 'cancelled')
 )
 
@@ -339,7 +341,7 @@ const wrapped = test.wrap(
 		}
 	).onCall
 )
-await expect(wrapped('123')).rejects.toEqual(
+await expect(wrapped('someData')).rejects.toEqual(
 	new functions.https.HttpsError('unauthenticated', 'Please Login First')
 )
 ```
