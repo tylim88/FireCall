@@ -104,11 +104,11 @@ FireCall standardizes how functions should handle:
 - Validate Response Data With Zod
 - error logging (only log the error, does not save the error into a file)
 
-Ensuring:
+Guarantee:
 
-- always use standard HTTPS Error
-- end point data type safety for both ends.(If you use with Firecaller)
-- same function name for both ends. (If you use with Firecaller)
+- standard HTTPS Error.
+- data type safety for both ends.(If you use with Firecaller)
+- function name correctness for both ends. (If you use with Firecaller)
 
 Optional: For maximum benefit, please use [FireCaller](https://github.com/tylim88/firecaller) in front end.
 
@@ -255,13 +255,13 @@ const getUser = onCall(
 ```
 
 If the response is ok, handler must return object with `code` and `data` property, where  
-`code`: 'ok'  
+`code`: `ok`  
 `data`: value that has same type as type you define in schema.res
 
-if the response is not ok, handler must return object with `code` and `message` properties, and an optional `err` property, where  
+if the response is not `ok`, handler must return object with `code` and `message` properties, and an optional `err` property, where  
 `code`: [Firebase Functions Error Code](https://firebase.google.com/docs/reference/node/firebase.functions#functionserrorcode) except 'ok'  
 `message`: string  
-`err`: optional, **user defined error**, put anything you want here, normally the error object or just skip it
+`err`?: **user defined error**, put anything you want here, normally the error object or just skip it
 
 ## Export Functions
 
@@ -386,11 +386,11 @@ const someFunc = onCall(
 
 `func` accept `functions` or `functions.FunctionBuilder`
 
-## Error Logging Options
+## Error Logging
 
-By default, FireCall do not log the necessary information upon error. Pass a function to config.onErrorLogging.
+By default, FireCall does not log anything.
 
-Do this if you want to log:
+Pass a function to config.onErrorLogging if you want to log:
 
 ```ts
 const someFunc = onCall(
@@ -399,9 +399,12 @@ const someFunc = onCall(
 		route: 'public', // route is not optional, you can use either 'public' or 'private' value
 		config: {
 			onErrorLogging: ({ context, reqData, reqZodError, resZodError, err }) => {
-				// do something here, eg save to file
+				// you can do something else here, eg save error to file
 
-				return X // log X on the console, X is an object literal
+				// example of what you can return
+				return undefined // no logging, default behavior
+				return { abc: reqData } //  will log { abc: reqData }
+				return { logType: 'info', abc: reqData } // will log { abc: reqData }, the log type is info
 			},
 		},
 	},
@@ -409,7 +412,7 @@ const someFunc = onCall(
 )
 ```
 
-`onErrorLogging`: optional, `({ reqData, context, reqZodError?, resZodError?, err? })=> Record<string,unknown> & { logType?: 'log' | 'info' | 'warn' | 'error' }`
+`onErrorLogging`?: `({ reqData, context, reqZodError?, resZodError?, err? }) => (Record<string,unknown> & { logType?: 'log' | 'info' | 'warn' | 'error' }) | undefined`
 
 `reqData`: the request data  
 `context`: Firebase function context callable  
@@ -417,15 +420,13 @@ const someFunc = onCall(
 `resZodError`: may exist, the error that occurs when trying to parse the response data  
 `err`: may exist, it is the **user defined error** you return to the handler(the response). Its type is unknown until there is user defined error in the response, which mean you don't need to type cast, FireCall will infer all the type for you.
 
-Note: Logging doesn't include saving it to a file or somewhere, it only logs it to the Firebase functions console. If you want to save the errors, then do it within function form.
-
 Whatever object literal the function return and(empty object = nothing to log) get logged on the console, except the `logType` props.
 
 `logType` props is an optional prop that set the type of your log, by default it is `error`.
 
-## Change Built In Error Message
+## Custom Error Message
 
-Here is how you change the built in error message:
+Here is how you customize error messages:
 
 ```ts
 const someFunc = onCall(
@@ -435,20 +436,20 @@ const someFunc = onCall(
 		config: {
 			changeBuiltInErrorCodeAndMessage: {
 				unauthenticated: {
-					code: 'someCode' // default unauthenticated
-					message: 'someMessage' // default Please Login First
+					code: 'someCode' // default: unauthenticated
+					message: 'someMessage' // default: Please Login First
 				},
 				unknown: {
-					code: 'someCode' // default unknown
-					message: 'someMessage' // default unknown
+					code: 'someCode' // default: unknown
+					message: 'someMessage' // default: unknown
 				},
 				resZodError: {
-					code: 'someCode' // default invalid-argument
-					message: 'someMessage' // default invalid-argument
+					code: 'someCode' // default: invalid-argument
+					message: 'someMessage' // default: invalid-argument
 				},
 				reqZodError: {
-					code: 'someCode' // default internal
-					message: 'someMessage' // default invalid response
+					code: 'someCode' // default: internal
+					message: 'someMessage' // default: invalid response
 				}
 			},
 		},
@@ -457,6 +458,8 @@ const someFunc = onCall(
 )
 ```
 
-Every prop of `changeBuiltInErrorCodeAndMessage` is optional, if no values are supplied, it uses default codes and messages.
+Every prop of `changeBuiltInErrorCodeAndMessage` is optional.
+
+If no values are supplied, it uses default codes and messages.
 
 The `code` value is limited to [Firebase Functions Error Code](https://firebase.google.com/docs/reference/node/firebase.functions#functionserrorcode) except 'ok'.
