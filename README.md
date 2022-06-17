@@ -106,9 +106,9 @@ FireCall standardizes how functions should handle:
 
 Guarantee:
 
-- standard HTTPS Error.
-- data type safety for both ends.(If you use with Firecaller)
-- function name correctness for both ends. (If you use with Firecaller)
+- Standard HTTPS Error.
+- Data type safety for both ends.(with Firecaller)
+- function name correctness for both ends.(with Firecaller)
 
 Optional: For maximum benefit, please use [FireCaller](https://github.com/tylim88/firecaller) in front end.
 
@@ -139,13 +139,6 @@ So to solve this is we prepare a schema and share it to both front end and back 
 It is very similar to how Graphql schema sharing works, but way much simpler and we all know how convoluted Graphql is.
 
 Long thing short, FireCall make sure that there is only one way to do stuff and giving you absolute type safe at both compile and run time.
-
-## Related Projects
-
-1. [FirelordJS](https://github.com/tylim88/FireCall) - Typescript wrapper for Firestore Web V9
-2. [Firelord](https://github.com/tylim88/Firelord) - Typescript wrapper for Firestore Admin
-3. [Firelordrn](https://github.com/tylim88/firelordrn) - Typescript wrapper for Firestore React Native
-4. [FireLaw](https://github.com/tylim88/firelaw) - Write Firestore security rule with Typescript, utilizing Firelord type engine.
 
 ## Installation
 
@@ -463,3 +456,10 @@ Every prop of `changeBuiltInErrorCodeAndMessage` is optional.
 If no values are supplied, it uses default codes and messages.
 
 The `code` value is limited to [Firebase Functions Error Code](https://firebase.google.com/docs/reference/node/firebase.functions#functionserrorcode) except 'ok'.
+
+## Related Projects
+
+1. [FirelordJS](https://github.com/tylim88/FireCall) - Typescript wrapper for Firestore Web V9
+2. [Firelord](https://github.com/tylim88/Firelord) - Typescript wrapper for Firestore Admin
+3. [Firelordrn](https://github.com/tylim88/firelordrn) - Typescript wrapper for Firestore React Native
+4. [FireLaw](https://github.com/tylim88/firelaw) - Write Firestore security rule with Typescript, utilizing Firelord type engine.
