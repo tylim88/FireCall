@@ -130,7 +130,7 @@ Some developer return error as 200 response and attach his own error code and me
 
 With FireCall, no more "you return your error, I return my error, he return his error", everybody simply return a god damn standard HTTPS error.
 
-FireCall standardize the way of handling these errors for you.
+FireCall standardize the way of handling these errors, there is only ONE way.
 
 There is also one common issue where developer often calling the wrong function name which lead to CORS error, basically front end and backend are not tally with each other.
 
@@ -138,7 +138,7 @@ So to solve this is we prepare a schema and share it to both front end and back 
 
 It is very similar to how Graphql schema sharing works, but way much simpler and we all know how convoluted Graphql is.
 
-Long thing short, FireCall make sure that there is only one way to do stuff and giving you absolute type safe at both compile and run time.
+Long thing short, FireCall make sure that there is only one way to do stuff and providing you absolute type safe at both compile and run time with single source of truth(zod).
 
 ## Installation
 
@@ -179,7 +179,9 @@ export const updateUserSchema = {
 }
 
 export const getUserSchema = {
-	res: z.string(), // userId
+	//request data schema
+	req: z.string(), // userId
+	// response data schema
 	res: z.object({
 		name: z.string(),
 		age: z.number(),
