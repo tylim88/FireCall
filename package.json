@@ -1,6 +1,6 @@
 {
 	"name": "firecall",
-	"version": "2.0.1",
+	"version": "2.0.4",
 	"description": "🔥Write callable functions systematically like a Firelord. No more chaotic error handling, no more unsafe endpoint data type, no more messy validation. Be the Master of Fire you always wanted to be.",
 	"source": "src/index.ts",
 	"main": "dist/index.js",

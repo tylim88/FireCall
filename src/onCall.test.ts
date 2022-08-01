@@ -1,4 +1,3 @@
-// @ts-ignore
 import { onCall } from './onCall'
 import { z } from 'zod'
 import fftest from 'firebase-functions-test'

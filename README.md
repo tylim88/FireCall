@@ -130,7 +130,7 @@ Some developer return error as 200 response and attach his own error code and me
 
 With FireCall, no more "you return your error, I return my error, he return his error", everybody simply return a god damn standard HTTPS error.
 
-FireCall standardize the way of handling these errors for you.
+FireCall standardize the way of handling these errors, there is only ONE way.
 
 There is also one common issue where developer often calling the wrong function name which lead to CORS error, basically front end and backend are not tally with each other.
 
@@ -138,7 +138,7 @@ So to solve this is we prepare a schema and share it to both front end and back 
 
 It is very similar to how Graphql schema sharing works, but way much simpler and we all know how convoluted Graphql is.
 
-Long thing short, FireCall make sure that there is only one way to do stuff and giving you absolute type safe at both compile and run time.
+Long thing short, FireCall make sure that there is only one way to do stuff and providing you absolute type safe at both compile and run time with single source of truth(zod).
 
 ## Installation
 
@@ -179,7 +179,9 @@ export const updateUserSchema = {
 }
 
 export const getUserSchema = {
-	res: z.string(), // userId
+	//request data schema
+	req: z.string(), // userId
+	// response data schema
 	res: z.object({
 		name: z.string(),
 		age: z.number(),
@@ -201,7 +203,7 @@ import { onCall } from 'firecall'
 // use any variable name you want
 const updateUser = onCall(
 	updateUserSchema,
-	{ route: 'private' }, // 'private' for protected route
+	{ route: 'private' }, // 'private' for protected route, user must sign in first, else automatically throw unauthenticated error (with customize-able message)
 	// handler
 	async (data, context) => {
 		const { name, age, address } = data // request data is what you define in schema.req
@@ -213,11 +215,12 @@ const updateUser = onCall(
 			await updateWithSomeDatabase({ uid, name, age, address })
 			return { code: 'ok', data: undefined } // response data is what you define in schema.res
 		} catch (err) {
-			// in case you are not catching any error, FireCall will also throw unknown error
+			// this is the error we catch, however if we did not catch the error and in case of error in runtime, FireCall will automatically throw unknown error for us
+			// if we handle the error and return it, like this piece of code, FireCall will infer the type for us in <Error Logging> (check this section for details)
 			return {
 				code: 'unknown',
 				message: 'update user failed',
-				err,
+				err, // this is the details of the error, could be object, could be string, could be anything, it is up to us
 			}
 		}
 	}
@@ -236,11 +239,12 @@ const getUser = onCall(
 			})
 			return { code: 'ok', data: { name, age } } // response data is what you define in schema.res
 		} catch (err) {
-			// in case you are not catching any error, FireCall will also throw unknown error
+			// this is the error we catch, however if we did not catch the error and in case of error in runtime, FireCall will automatically throw unknown error for us
+			// if we handle the error and return it, like this piece of code, FireCall will infer the type for us in <Error Logging> (check this section for details)
 			return {
 				code: 'unknown',
 				message: 'get user failed',
-				err,
+				err, // this is the details of the error, could be object, could be string, could be anything, it is up to us
 			}
 		}
 	}
@@ -411,7 +415,7 @@ const someFunc = onCall(
 `context`: Firebase function context callable  
 `reqZodError`: may exist, the error that occurs when trying to parse the request data  
 `resZodError`: may exist, the error that occurs when trying to parse the response data  
-`err`: may exist, it is the **user defined error** you return to the handler(the response). Its type is unknown until there is user defined error in the response, which mean you don't need to type cast, FireCall will infer all the type for you.
+`err`: may exist, it is the **user defined error** you return to the handler(the response). Its type is unknown until there is user defined error in the onCall callback, which mean you don't need to type cast, FireCall will infer all the type for you.
 
 Whatever object literal the function return and(empty object = nothing to log) get logged on the console, except the `logType` props.
 
