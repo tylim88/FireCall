@@ -116,7 +116,7 @@ support [firebase-functions-test](#firebase-function-test):
 
 ## Note
 
-API interface not quite good to be honest,will redesign the API in V3
+API interface not quite good to be honest, will redesign the API in V3
 
 ## Why Do You Need This? What Is The Problem FireCall Trying To Solve?
 
