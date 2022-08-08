@@ -114,6 +114,10 @@ Optional: For maximum benefit, please use [FireCaller](https://github.com/tylim8
 
 support [firebase-functions-test](#firebase-function-test):
 
+## Note
+
+API interface not quite good to be honest, will redesign the API in V3
+
 ## Why Do You Need This? What Is The Problem FireCall Trying To Solve?
 
 When coding a callable function (or any endpoint in general), we need to deal with 5 basic errors, which is basically 99% of your errors, the rest are system errors.
