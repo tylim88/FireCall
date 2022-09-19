@@ -294,7 +294,7 @@ exp(allFunc).forEach(func => {
 
 You can use FireCall with [firebase-functions-test](https://firebase.google.com/docs/functions/unit-testing):
 
-ok test example:
+pass test example:
 
 ```ts
 const wrapped = test.wrap(
@@ -313,7 +313,7 @@ await expect(wrapped('someData', { auth: { uid: '123' } })).resolves.toEqual(
 )
 ```
 
-error test examples:
+fail test examples:
 
 ```ts
 const wrapped = test.wrap(
@@ -349,7 +349,7 @@ await expect(wrapped('someData')).rejects.toEqual(
 
 ## Const Assertion
 
-You can use const assertion if the handler is returning response from another callback, example from the transaction.
+You need to use const assertion if the handler is returning response from another callback, example from the transaction.
 
 ```ts
 import { onCall } from 'firecall'
