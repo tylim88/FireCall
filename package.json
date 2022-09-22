@@ -1,6 +1,6 @@
 {
 	"name": "firecall",
-	"version": "2.0.5",
+	"version": "2.0.6",
 	"description": "🔥Write callable functions systematically like a Firelord. No more chaotic error handling, no more unsafe endpoint data type, no more messy validation. Be the Master of Fire you always wanted to be.",
 	"source": "src/index.ts",
 	"main": "dist/index.js",
@@ -19,11 +19,27 @@
 		"test": "rm -rf coverage && jest --forceExit",
 		"parcel": "rm -rf dist && tsc --emitDeclarationOnly true && parcel build",
 		"build": "rm -rf dist && tsc",
-		"link": "npm run build && npm link",
+		"link": "npm run build && npm unlink firesword && npm run build && npm link",
 		"pub": "npm run build && npm publish --tag beta",
 		"dev": "---------------------dev------------------------",
 		"d-test": "tsc && npm test"
 	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/tylim88/FireCall.git"
+	},
+	"keywords": [
+		"firebase",
+		"cloud",
+		"functions",
+		"helper"
+	],
+	"author": "",
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/tylim88/FireCall/issues"
+	},
+	"homepage": "https://github.com/tylim88/FireCall#readme",
 	"devDependencies": {
 		"@babel/preset-env": "^7.17.10",
 		"@babel/preset-typescript": "^7.16.7",
@@ -50,20 +66,7 @@
 		"typescript": "^4.6.4",
 		"zod": "^3.15.1"
 	},
-	"repository": {
-		"type": "git",
-		"url": "git+https://github.com/tylim88/FireCall.git"
-	},
-	"keywords": [
-		"firebase",
-		"cloud",
-		"functions",
-		"helper"
-	],
-	"author": "",
-	"license": "MIT",
-	"bugs": {
-		"url": "https://github.com/tylim88/FireCall/issues"
-	},
-	"homepage": "https://github.com/tylim88/FireCall#readme"
+	"peerDependencies": {
+		"firebase-functions": "^3.21.2"
+	}
 }
