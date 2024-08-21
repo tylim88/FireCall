@@ -1,3 +1,7 @@
+## Note
+
+API interface not quite good to be honest, will redesign the API in V3
+
 <!-- markdownlint-disable MD010 -->
 <!-- markdownlint-disable MD033 -->
 <!-- markdownlint-disable MD041 -->
@@ -113,10 +117,6 @@ Guarantee:
 Optional: For maximum benefit, please use [FireCaller](https://github.com/tylim88/firecaller) in front end.
 
 support [firebase-functions-test](#firebase-function-test):
-
-## Note
-
-API interface not quite good to be honest, will redesign the API in V3
 
 ## Why Do You Need This? What Is The Problem FireCall Trying To Solve?
 
