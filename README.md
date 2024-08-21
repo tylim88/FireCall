@@ -1,3 +1,6 @@
+# Update
+Do not use this library, I am planning to rewrite it.
+
 <!-- markdownlint-disable MD010 -->
 <!-- markdownlint-disable MD033 -->
 <!-- markdownlint-disable MD041 -->
@@ -93,6 +96,7 @@
 </div>
 <br/>
 <br/>
+
 FireCall standardizes how functions should handle:
 
 - Unauthorized Authentication Error
